@@ -26,6 +26,16 @@
   "activationEvents": [
     "onLanguage:sv0"
   ],
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": "limited",
+      "description": "Syntax highlighting, snippets, and phase-0 formatting work in untrusted workspaces. No process is ever spawned and no code is ever executed regardless of trust state (SEC-001/SEC-002)."
+    },
+    "virtualWorkspaces": {
+      "supported": "limited",
+      "description": "Lexical features (highlighting, snippets, phase-0 formatting) work in virtual workspaces. Semantic features are not yet implemented in F0."
+    }
+  },
   "main": "./dist/src/node/extension.js",
   "browser": "./dist/src/web/extension.js",
   "contributes": {
