@@ -1,0 +1,83 @@
+{
+  "name": "sv0-lang",
+  "displayName": "sv0",
+  "description": "Language support for sv0: syntax highlighting, snippets, and phase-0 formatting. Semantic intelligence (diagnostics, navigation, completion) arrives with the sv0-lsp-backed R0.1 release.",
+  "publisher": "sv0-toolchain",
+  "version": "0.1.0",
+  "preview": true,
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sv0-toolchain/sv0-vsc-extension.git"
+  },
+  "bugs": {
+    "url": "https://github.com/sv0-toolchain/sv0-vsc-extension/issues"
+  },
+  "engines": {
+    "vscode": ">=1.85.0",
+    "node": ">=22.0.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "keywords": [
+    "sv0"
+  ],
+  "activationEvents": [
+    "onLanguage:sv0"
+  ],
+  "main": "./dist/src/node/extension.js",
+  "browser": "./dist/src/web/extension.js",
+  "contributes": {
+    "languages": [
+      {
+        "id": "sv0",
+        "aliases": [
+          "sv0"
+        ],
+        "extensions": [
+          ".sv0"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "sv0",
+        "scopeName": "source.sv0",
+        "path": "./syntaxes/sv0.tmLanguage.json"
+      }
+    ],
+    "snippets": [
+      {
+        "language": "sv0",
+        "path": "./snippets/sv0.json"
+      }
+    ],
+    "commands": [
+      {
+        "command": "sv0.showServerStatus",
+        "title": "sv0: Show Language Server Status"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run build",
+    "build": "tsc -p ./",
+    "watch": "tsc -w -p ./",
+    "lint": "eslint src test",
+    "typecheck": "tsc --noEmit -p ./",
+    "test:unit": "node --test 'dist/test/**/*.test.js'",
+    "test:vsix": "node scripts/test-vsix-stub.mjs",
+    "check": "npm run lint && npm run typecheck && npm run build && npm run test:unit"
+  },
+  "devDependencies": {
+    "@types/node": "22.10.5",
+    "@types/vscode": "1.85.0",
+    "@typescript-eslint/eslint-plugin": "8.19.0",
+    "@typescript-eslint/parser": "8.19.0",
+    "@vscode/vsce": "3.2.1",
+    "eslint": "9.17.0",
+    "typescript": "5.7.2"
+  }
+}

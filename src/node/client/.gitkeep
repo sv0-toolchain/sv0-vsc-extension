@@ -1,0 +1,3 @@
+LSP client transport/discovery/lifecycle code lands here starting Phase 2
+(task/sv0-vsc-extension-checklist.Rmd VSC-S-206 onward). Empty by design in
+the F0 scaffold — AE-002 forbids any semantic fallback here.

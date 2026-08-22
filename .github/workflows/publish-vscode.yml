@@ -1,0 +1,93 @@
+name: Publish VS Code Marketplace
+
+# Secretless Marketplace publication per spec §26.6 and OD-008. Bound to the
+# vscode-marketplace trusted-publishing policy (VSC-S-008) — do not rename
+# this file or the environment below without updating that policy first.
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    name: Test and publish exact VSIX
+    runs-on: ubuntu-latest
+    environment: vscode-marketplace
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Check out signed release source
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Run release checks
+        run: npm run check
+
+      - name: Derive and validate release channel
+        id: release
+        shell: bash
+        run: |
+          tag="${GITHUB_REF_NAME#v}"
+          channel="stable"
+          if [[ "$tag" == *-preview ]]; then
+            channel="preview"
+            tag="${tag%-preview}"
+          fi
+          version="$(node -p "require('./package.json').version")"
+          test "$tag" = "$version"
+          printf 'channel=%s\n' "$channel" >> "$GITHUB_OUTPUT"
+          printf 'version=%s\n' "$version" >> "$GITHUB_OUTPUT"
+
+      - name: Inspect packaged file tree
+        run: ./node_modules/.bin/vsce ls --tree
+
+      - name: Package one release artifact
+        shell: bash
+        run: |
+          mkdir -p dist
+          flags=()
+          if [[ "${{ steps.release.outputs.channel }}" == "preview" ]]; then
+            flags+=(--pre-release)
+          fi
+          ./node_modules/.bin/vsce package "${flags[@]}" \
+            --out dist/sv0-vsc-extension.vsix
+          sha256sum dist/sv0-vsc-extension.vsix \
+            | tee dist/sv0-vsc-extension.vsix.sha256
+
+      - name: Test packaged artifact
+        run: npm run test:vsix -- dist/sv0-vsc-extension.vsix
+
+      - name: Retain candidate and checksum
+        uses: actions/upload-artifact@v4
+        with:
+          name: sv0-vscode-${{ steps.release.outputs.version }}
+          path: |
+            dist/sv0-vsc-extension.vsix
+            dist/sv0-vsc-extension.vsix.sha256
+          if-no-files-found: error
+
+      - name: Publish exact tested artifact with OIDC
+        shell: bash
+        run: |
+          flags=()
+          if [[ "${{ steps.release.outputs.channel }}" == "preview" ]]; then
+            flags+=(--pre-release)
+          fi
+          ./node_modules/.bin/vsce publish --oidc \
+            --packagePath dist/sv0-vsc-extension.vsix "${flags[@]}"

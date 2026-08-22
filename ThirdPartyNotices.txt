@@ -1,0 +1,16 @@
+THIRD-PARTY NOTICES
+
+This file lists third-party software distributed with, or bundled inside,
+the packaged sv0 extension (.vsix). It is generated/maintained by hand and
+must be kept current as production dependencies change.
+
+As of this scaffold (2026-08-22): NONE.
+
+No upstream sv0-toolchain binary (sv0c, sv0vm, sv0-lsp, Z3, or toolchain
+scripts) is bundled with this extension (PKG-008). No production npm
+dependency ships in the packaged VSIX at this stage; devDependencies are
+excluded by .vscodeignore.
+
+When a production runtime dependency or bundled binary is added, record its
+name, version, license (SPDX identifier), and license text (or a pointer to
+it) here before the next release.

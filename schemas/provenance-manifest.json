@@ -1,0 +1,26 @@
+{
+  "$comment": "GOV-001 provenance manifest (scaffold, VSC-S-111). Every generated/copied grammar, keyword, snippet, and diagnostic fixture must have an entry here recording its upstream repository and revision. The build/CI drift gate (GOV-002, VSC-S-112) reads this file.",
+  "artifacts": [
+    {
+      "path": "syntaxes/sv0.tmLanguage.json",
+      "upstream_repo": "sv0doc",
+      "upstream_revision": "451fcd9e4a09bb4c17eb8f45d8fdf861dce9f293",
+      "upstream_paths": [
+        "keywords/reference.md",
+        "grammar/sv0.ebnf"
+      ],
+      "status": "scaffold",
+      "note": "Seeds the full 43-keyword reserved list and the operator tables from keywords/reference.md §1-2. Golden-test coverage (LANG-001..005) not yet built."
+    },
+    {
+      "path": "snippets/sv0.json",
+      "upstream_repo": "sv0c",
+      "upstream_revision": "ac272be5f089ea7eee2208ab03498c1446e5280f",
+      "upstream_paths": [
+        "examples/learn"
+      ],
+      "status": "scaffold",
+      "note": "Snippet bodies must stay demonstrated-syntax-only (LANG-008); not yet verified against the pinned examples corpus."
+    }
+  ]
+}

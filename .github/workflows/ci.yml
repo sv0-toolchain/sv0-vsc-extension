@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    name: Lint, typecheck, unit tests, manifest + drift gates
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+      - run: npm run check
+      - run: node scripts/validate-manifest.mjs
+
+      # GOV-002 drift gate needs the pinned sv0doc revision checked out
+      # alongside this repo. CI checks out sv0-toolchain (which pins sv0doc
+      # as a submodule) at a sibling path.
+      - name: Check out sv0-toolchain (for sv0doc keyword reference)
+        uses: actions/checkout@v4
+        with:
+          repository: sv0-toolchain/sv0-toolchain
+          submodules: true
+          path: sv0-toolchain-ref
+
+      - run: node scripts/check-language-drift.mjs --sv0doc-root sv0-toolchain-ref/sv0doc
+
+      - name: Package dry run + file-tree inspection (PKG-012)
+        run: |
+          ./node_modules/.bin/vsce ls --tree
+          mkdir -p dist
+          ./node_modules/.bin/vsce package --pre-release --out dist/ci-dry-run.vsix

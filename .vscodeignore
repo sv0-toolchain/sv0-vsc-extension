@@ -1,0 +1,17 @@
+.github/**
+.gitignore
+.vscode/**
+.vscode-test/**
+src/**
+test/**
+dist/test/**
+scripts/**
+schemas/**
+*.ts
+tsconfig.json
+.eslintrc*
+eslint.config.*
+node_modules/**
+!node_modules/**/LICENSE*
+**/*.map
+**/.DS_Store
