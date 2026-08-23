@@ -138,10 +138,20 @@
       "name": "entity.name.type.sv0"
     },
     "operators": {
+      "_comment": "Order matters: vscode-textmate's underlying oniguruma scanner breaks same-start-position ties by ARRAY ORDER, not match length. Every entry here that could tie with a shorter overlapping alternative from a later entry (e.g. shift <<= vs shift << vs comparison <) must be listed before it. See test/unit/grammar.test.ts LANG-005 for the regression coverage.",
       "patterns": [
         {
           "name": "keyword.operator.range.sv0",
           "match": "\\.\\.=|\\.\\."
+        },
+        {
+          "name": "keyword.operator.assignment.sv0",
+          "comment": "compound shift-assign forms must precede plain shift (<<) and comparison (<)",
+          "match": "<<=|>>="
+        },
+        {
+          "name": "keyword.operator.shift.sv0",
+          "match": "<<|>>"
         },
         {
           "name": "keyword.operator.comparison.sv0",
@@ -152,24 +162,21 @@
           "match": "&&|\\|\\||!"
         },
         {
-          "name": "keyword.operator.shift.sv0",
-          "match": "<<|>>"
+          "name": "keyword.operator.assignment.sv0",
+          "comment": "remaining compound-assign forms + plain =, after comparison's == and after logical's && / ||, before the bitwise/arithmetic single-char fallbacks they'd otherwise tie with",
+          "match": "=|\\+=|-=|\\*=|/=|%=|&=|\\|=|\\^="
         },
         {
           "name": "keyword.operator.error-propagation.sv0",
           "match": "\\?"
         },
         {
-          "name": "keyword.operator.arithmetic.sv0",
-          "match": "\\+|-|\\*|/|%"
-        },
-        {
           "name": "keyword.operator.bitwise.sv0",
           "match": "&|\\||\\^|~"
         },
         {
-          "name": "keyword.operator.assignment.sv0",
-          "match": "=|\\+=|-=|\\*=|/=|%=|&=|\\|=|\\^=|<<=|>>="
+          "name": "keyword.operator.arithmetic.sv0",
+          "match": "\\+|-|\\*|/|%"
         }
       ]
     }

@@ -21,19 +21,25 @@ jobs:
           cache: npm
 
       - run: npm ci
-      - run: npm run check
-      - run: node scripts/validate-manifest.mjs
 
-      # GOV-002 drift gate needs the pinned sv0doc revision checked out
-      # alongside this repo. CI checks out sv0-toolchain (which pins sv0doc
-      # as a submodule) at a sibling path.
-      - name: Check out sv0-toolchain (for sv0doc keyword reference)
+      # GOV-002 drift gate + FMT-001 differential formatter test both need a
+      # real sv0-toolchain checkout: the former for the pinned sv0doc
+      # keyword reference (a submodule of sv0-toolchain), the latter for
+      # scripts/fmt_sv0.py. Check it out once, before `npm run check`, so
+      # test:unit's differential test finds it too (it looks one directory
+      # above this repo by default, or SV0_TOOLCHAIN_ROOT).
+      - name: Check out sv0-toolchain (for sv0doc + fmt_sv0.py)
         uses: actions/checkout@v4
         with:
           repository: sv0-toolchain/sv0-toolchain
           submodules: true
           path: sv0-toolchain-ref
 
+      - run: npm run check
+        env:
+          SV0_TOOLCHAIN_ROOT: ${{ github.workspace }}/sv0-toolchain-ref
+
+      - run: node scripts/validate-manifest.mjs
       - run: node scripts/check-language-drift.mjs --sv0doc-root sv0-toolchain-ref/sv0doc
 
       - name: Package dry run + file-tree inspection (PKG-012)
