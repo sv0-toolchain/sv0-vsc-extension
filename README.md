@@ -29,6 +29,15 @@ programming language with static contract verification.
 - `sv0: Show Language Server Status` — always explains that no semantic
   server is configured yet in F0
 
+**Syntax highlighting is not a correctness signal.** The highlighter (a
+TextMate grammar) classifies tokens by shape alone — it has no parser, no
+type checker, and no knowledge of sv0's semantics. A file with mismatched
+braces, an unterminated string, or an outright type error will still be
+colored as if it were valid sv0; the grammar's job is only to make real code
+legible, not to validate it. Highlighting looking "normal" tells you nothing
+about whether the file compiles. Real error detection arrives with the
+compiler-backed diagnostics in R0.1.
+
 ## What does not work yet
 
 - Diagnostics (errors/warnings from the compiler)
@@ -63,6 +72,27 @@ and known gaps.
 
 Install from the Visual Studio Marketplace once published (`sv0-toolchain.sv0-lang`).
 No configuration is required for F0 — open any `.sv0` file.
+
+## Building a release candidate (maintainers)
+
+Two ways to produce a `.vsix`, neither of which publishes anywhere:
+
+- **GitHub Actions (no local setup needed):** run the **Build VSIX (manual
+  upload)** workflow from the Actions tab (`workflow_dispatch`). It runs the
+  full gate suite (lint, typecheck, unit tests including the FMT-001
+  differential test and the GOV-002 keyword-drift check against a real
+  `sv0doc` checkout, manifest validation) and uploads the packaged `.vsix`
+  plus its SHA-256 as a downloadable run artifact.
+- **Locally:** `./scripts/package.sh [--pre-release]` runs the same gates
+  and leaves the artifact in `dist/`.
+
+Either `.vsix` can be uploaded directly through the [Marketplace publisher
+management portal](https://marketplace.visualstudio.com/manage/publishers/sv0-toolchain)
+(new extension: "New extension" → Visual Studio Code → upload the file;
+updating an existing listing: the extension's "..." menu → Update) before
+OIDC trusted publishing (`publish-vscode.yml`) is configured. Once trusted
+publishing is set up, prefer pushing a signed `v*` tag and letting
+`publish-vscode.yml` publish automatically instead of uploading by hand.
 
 ## Source authority
 

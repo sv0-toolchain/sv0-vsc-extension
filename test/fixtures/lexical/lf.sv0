@@ -1,0 +1,14 @@
+// LANG-010 fixture: plain LF line endings, canonical positive syntax.
+struct Point {
+	x: i32,
+	y: i32,
+}
+
+fn distance(a: Point, b: Point) -> i32
+	requires(true)
+	ensures(result >= 0)
+{
+	let dx = a.x - b.x;
+	let dy = a.y - b.y;
+	return dx * dx + dy * dy;
+}

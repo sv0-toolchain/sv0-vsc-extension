@@ -1,0 +1,6 @@
+// LANG-010 fixture: non-BMP Unicode and combining/accented characters.
+fn greet() -> i32 {
+	let café = "héllo wörld 你好 😀🎉"; // non-BMP emoji + CJK + accents
+	let x = café;
+	return 0;
+}

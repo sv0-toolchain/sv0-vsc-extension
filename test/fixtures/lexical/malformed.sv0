@@ -1,0 +1,7 @@
+// LANG-010 fixture: malformed / incomplete source. This file MUST NOT parse
+// or compile — it exists to prove the TextMate grammar tokenizes it as text
+// without throwing (GOV-003: highlighting is not a validity check).
+fn broken( {
+	let s = "unterminated string
+	let x = 1 +;
+	if x {

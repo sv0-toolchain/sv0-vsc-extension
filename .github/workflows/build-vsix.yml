@@ -1,0 +1,87 @@
+name: Build VSIX (manual upload)
+
+# Produces a downloadable .vsix WITHOUT publishing anywhere. This is the
+# path for manually uploading to the Marketplace publisher dashboard
+# (marketplace.visualstudio.com/manage/publishers/sv0-toolchain -> your
+# extension -> "..." -> Update, or "New extension" for the very first
+# upload) before OIDC trusted publishing (VSC-S-008, publish-vscode.yml) is
+# configured. Once trusted publishing is set up, prefer pushing a `v*` tag
+# and letting publish-vscode.yml handle it end to end instead of this.
+#
+# Trigger from the Actions tab: this workflow -> "Run workflow". Optionally
+# check "pre-release" (default: checked, since this repo hasn't reached R1).
+# Download the .vsix from the run's Artifacts section when it finishes.
+
+on:
+  workflow_dispatch:
+    inputs:
+      pre_release:
+        description: "Package as a Marketplace pre-release (--pre-release)"
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build and package (no publish)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      # Same sv0-toolchain checkout as ci.yml, so the drift gate and the
+      # FMT-001 differential test run for real here too — a VSIX handed to
+      # a human for upload should pass the exact same gates as CI.
+      - name: Check out sv0-toolchain (for sv0doc + fmt_sv0.py)
+        uses: actions/checkout@v4
+        with:
+          repository: sv0-toolchain/sv0-toolchain
+          submodules: true
+          path: sv0-toolchain-ref
+
+      - run: npm run check
+        env:
+          SV0_TOOLCHAIN_ROOT: ${{ github.workspace }}/sv0-toolchain-ref
+
+      - run: node scripts/validate-manifest.mjs
+      - run: node scripts/check-language-drift.mjs --sv0doc-root sv0-toolchain-ref/sv0doc
+
+      - name: Read package version
+        id: pkg
+        run: echo "version=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
+
+      - name: Package
+        shell: bash
+        run: |
+          mkdir -p dist
+          flags=()
+          if [[ "${{ inputs.pre_release }}" == "true" ]]; then
+            flags+=(--pre-release)
+          fi
+          ./node_modules/.bin/vsce package "${flags[@]}" \
+            --out "dist/sv0-lang-${{ steps.pkg.outputs.version }}.vsix"
+
+      - name: Checksum
+        run: |
+          sha256sum "dist/sv0-lang-${{ steps.pkg.outputs.version }}.vsix" \
+            | tee "dist/sv0-lang-${{ steps.pkg.outputs.version }}.vsix.sha256"
+
+      - name: File tree (sanity check before you upload)
+        run: ./node_modules/.bin/vsce ls --tree
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sv0-lang-${{ steps.pkg.outputs.version }}
+          path: |
+            dist/sv0-lang-${{ steps.pkg.outputs.version }}.vsix
+            dist/sv0-lang-${{ steps.pkg.outputs.version }}.vsix.sha256
+          if-no-files-found: error
+          retention-days: 30
